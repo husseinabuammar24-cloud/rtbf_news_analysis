@@ -26,6 +26,8 @@ comming soon.
 ### Status
 
 Repository created 
-Environment setup 
+
+Environment setup
+ 
 Initial scraping test 
 
