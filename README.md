@@ -1,243 +1,191 @@
-# RTBF News Analysis & Clustering
+# RTBF News Analysis
 
-## Project Overview
+This project collects RTBF news articles, cleans and validates them, generates multilingual sentence embeddings, and applies BERTopic to discover the main themes discussed in the corpus.
 
-This project analyzes RTBF news coverage by:
+The work is now organized around a complete data pipeline: scraping, cleaning, embedding, topic modeling, and visualization of results.
 
-- Scraping RTBF news articles and metadata
-- Cleaning and validating a large-scale news dataset
-- Performing topic modeling to discover major themes
-- Clustering semantically similar articles
-- Visualizing trends, news cycles, and content coverage
-- Building an interactive dashboard for exploring the results
+## Current status
 
-The objective is to help identify trending topics, content clusters, and potential coverage gaps within RTBF news production.
+Completed ✅
+- RTBF article URL collection and raw dataset creation
+- Article metadata extraction and full content parsing
+- Dataset cleaning and validation
+- Multilingual embedding generation with SentenceTransformers
+- BERTopic topic modeling on the cleaned corpus
+- Topic summaries and interactive HTML visualizations exported to the outputs folder
 
----
+In progress / planned 🔄
+- Interactive dashboard for exploring topics and articles
+- Deeper editorial interpretation of the discovered themes
+- Deployment and presentation layer
 
-## Dataset Summary
+## Dataset overview
 
-### Raw Dataset
-- 2,161 scraped articles
+### Final cleaned dataset
+- 2,123 valid articles retained after cleaning
+- Coverage period: 2020-10-01 to 2026-10-09
+- Average article length: approximately 2,900 characters
+- Most articles are written in French and cover a broad range of RTBF editorial themes
 
-### Clean Dataset
-- 2,123 validated articles
+### Cleaning checks applied
+- Removed missing title/body rows
+- Removed duplicate URLs and duplicate titles
+- Filtered non-news pages and promo/service pages
+- Removed very short articles (< 500 characters)
+- Parsed and validated publication dates
+- Kept clean text fields for transformer-based embedding generation
 
-### Coverage Period
-- October 2020 to October 2026
+## Project pipeline
 
-### Average Article Length
-- 2,900 characters
+1. Data collection
+   - Crawl and store RTBF article URLs
+   - Parse article metadata, title, date, category, body, and length
 
----
+2. Data cleaning
+   - Validate article structure
+   - Remove duplicates and non-news entries
+   - Normalize dates and produce a clean dataset
 
-## Technologies
+3. Embedding generation
+   - Use a multilingual sentence transformer model
+   - Create numerical vector representations for each article
 
-### Data Collection
-- Python
-- Requests
-- BeautifulSoup
-- JSON-LD Parsing
+4. Topic modeling
+   - Apply BERTopic with UMAP + HDBSCAN
+   - Discover semantic clusters without relying on RTBF category labels
 
-### NLP & Machine Learning
-- Sentence Transformers
-- BERTopic
-- HDBSCAN
-- UMAP
+5. Visualization
+   - Export topic summaries and interactive HTML plots
+   - Inspect topic distributions and document embeddings
 
-### Data Processing
-- Pandas
-- NumPy
-
-### Visualization & Deployment
-- Streamlit
-- Plotly
-
----
-
-## Project Structure
+## Repository structure
 
 ```text
 rtbf_news_analysis/
-
 ├── data/
 │   ├── raw/
+│   │   ├── article_urls.txt
+│   │   ├── articles.csv
+│   │   └── sample_article.csv
 │   └── processed/
-│
+│       ├── articles_clean.csv
+│       └── embeddings.npy
+├── outputs/
+│   ├── topic_info.csv
+│   ├── topics_barchart.html
+│   ├── topics_map.html
+│   ├── topics_hierarchy.html
+│   ├── topics_over_time.html
+│   └── documents_map.html
 ├── src/
 │   ├── article_parser.py
-│   ├── preprocessing.py
-│   ├── embeddings.py
-│   ├── topic_modeling.py
+│   ├── build_dataset.py
 │   ├── clustering.py
-│   └── scraper.py
-│
+│   ├── embeddings.py
+│   ├── main.py
+│   ├── preprocessing.py
+│   ├── scraper.py
+│   ├── topic_modeling.py
+│   └── archive.py
 ├── dashboard/
-│
+│   └── app.py
 ├── notebooks/
-│
 ├── tests/
-│
 ├── README.md
 ├── requirements.txt
+├── image.png
+├── image-1.png
 └── .gitignore
 ```
 
----
+## Technical stack
 
-## Data Cleaning & Validation
+### Data collection and parsing
+- Python
+- Requests
+- BeautifulSoup
+- JSON-LD extraction
 
-The preprocessing pipeline performs the following checks:
+### NLP / machine learning
+- SentenceTransformers
+- BERTopic
+- UMAP
+- HDBSCAN
+- scikit-learn
+- Pandas / NumPy
 
-- Removed duplicate articles
-- Removed duplicate titles
-- Removed articles with missing content
-- Removed non-news pages
-- Filtered articles shorter than 500 characters
-- Standardized publication dates
-- Validated date parsing
-- Checked dataset quality and article lengths
-- Retained natural French text for transformer-based embeddings
+### Visualization
+- Plotly
+- HTML exports from BERTopic
 
-### Cleaning Results
+## Topic modeling results
 
-| Step | Removed |
-|--------|----------|
-| Missing title/body | 0 |
-| Duplicate URLs | 0 |
-| Duplicate titles | 1 |
-| Non-news pages | 6 |
-| Articles shorter than 500 characters | 31 |
-| Invalid dates | 0 |
+The BERTopic model was applied to the cleaned dataset using multilingual embeddings. The result is a semantic clustering of 2,123 RTBF articles into 37 meaningful topics.
 
-### Final Dataset
+### Top discovered themes
+- Film, series, and culture
+- Rock, music, and artists
+- Cycling and sport events
+- Education and student life
+- Football and domestic sport coverage
+- Court cases and public affairs
+- Ukraine war and geopolitical news
+- Video games and gaming culture
+- Government, budget, and public finance
+- Weather and climate
+- AI and technology
+- Health and cancer-related coverage
+- Formula 1 and motorsport
+- Transport, urban projects, and public services
+
+### Example output
+
+The model produced structured topic information in `outputs/topic_info.csv`, including:
+- topic id
+- article count per topic
+- generated topic label
+- representative documents
+- topic representation words
+
+The outputs folder also contains interactive visualizations such as:
+- `topics_barchart.html`
+- `topics_map.html`
+- `topics_hierarchy.html`
+- `topics_over_time.html`
+- `documents_map.html`
+
+## Key numbers
 
 ```text
-2123 articles
+Clean articles: 2123
+Topics found: 37
+Outliers: 1
+Date range: 2020-10-01 to 2026-10-09
 ```
 
----
+## How to run the pipeline
 
-## Dataset Statistics
+From the project root:
 
-### Article Length
+```bash
+source nlp-env/bin/activate
 
-```text
-Count : 2123
-Mean  : 2900 characters
-Median: 2260 characters
-Min   : 501 characters
-Max   : 28350 characters
+python src/main.py
+python src/preprocessing.py
+python src/embeddings.py
+python src/topic_modeling.py
 ```
 
-### Most Frequent Categories
+This reproduces the core workflow from raw article extraction to topic modeling.
 
-- Belgique
-- Monde
-- Bruxelles
-- Journal du Rock
-- Diables Rouges
-- Jeux vidéo
-- Hainaut
-- Cyclisme
-- Classic 21
-- Formule 1
+## What remains
 
----
+The core analysis pipeline has been completed. The remaining work is mainly presentation and exploitation:
+- build an interactive dashboard
+- improve topic interpretation and storytelling
+- prepare a final business or research presentation
+- optionally deploy the dashboard in a web environment
 
-## Data Quality Checks
+## Summary
 
-The dataset was inspected for common boilerplate and template content:
-
-- Lire aussi
-- Newsletter
-- Publicité
-- Cookie
-- Belga
-- Abonnez
-
-Occurrences were found to be very rare and mostly appeared in legitimate article content, so they were not removed.
-
----
-
-## Current Progress
-
-### Completed
-
-- [x] Repository setup
-- [x] Virtual environment setup
-- [x] RTBF article scraper
-- [x] Metadata extraction
-- [x] Full article extraction via JSON-LD
-- [x] Dataset creation
-- [x] Dataset cleaning and validation
-- [x] 2,123 clean news articles collected
-
-### In Progress
-
-- [ ] Sentence embeddings generation
-- [ ] Topic modeling with BERTopic
-- [ ] Article clustering
-- [ ] Topic visualization
-
-### Planned
-
-- [ ] Interactive Streamlit dashboard
-- [ ] Deployment
-- [ ] Azure architecture documentation
-- [ ] Business presentation
-
----
-
-## Next Steps
-
-1. Generate multilingual article embeddings using Sentence Transformers.
-2. Apply BERTopic to discover major news themes.
-3. Cluster semantically similar articles.
-4. Create visualizations for topics and content clusters.
-5. Develop and deploy an interactive Streamlit dashboard.
-6. Present key editorial insights and coverage trends.
-
----
-
-## Status
-
-✅ Dataset acquisition complete
-
-✅ Preprocessing complete
-
-✅ Quality validation complete
-
-🔄 Topic modeling in progress
-
-🔄 Clustering in progress
-
-⏳ Dashboard and deployment pending
-
-
-
-## Topic Modeling Results
-
-BERTopic was applied to 2,123 cleaned RTBF articles using multilingual sentence embeddings.
-
-Results:
-
-- 37 semantic topics identified
-- Articles grouped by meaning rather than website categories
-- Topics discovered automatically from article content
-
-Examples of topics:
-
-- Film & Television
-- Rock & Music
-- Cycling
-- Education
-- Government & Budget
-- Ukraine War
-- Video Games
-- Artificial Intelligence
-- Health & Cancer
-- Formula 1
-- Gaza Conflict
-- Public Transport
-- Weather
+The project has already moved beyond data collection and into actual semantic analysis. The current state is not just a scraper: it is a working news-analysis pipeline with a cleaned dataset, embeddings, and BERTopic outputs that reveal the main editorial themes in RTBF coverage.
