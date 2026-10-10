@@ -18,3 +18,7 @@ bin-release/
 # information for Eclipse / Flash Builder.
 
 .DS_Store
+
+nlp-env/
+__pycache__/
+*.pyc

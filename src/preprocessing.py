@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import re
+
 RAW = Path("data/raw/articles.csv")
 OUT = Path("data/processed/articles_clean.csv")
 
@@ -23,6 +25,10 @@ NON_NEWS_TITLES = [
     r"^Gagnez ",
 ]
 
+def clean_for_embeddings(text):
+    text = text.strip()
+    text = re.sub(r"\s+", " ", text)
+    return text
 
 def step(df: pd.DataFrame, label: str, before: int) -> int:
     print(f"{label:<35} {before - len(df):>5} removed -> {len(df)} rows")
@@ -78,6 +84,24 @@ def main() -> None:
     print("\nArticle length:")
     print(df["article_length"].describe())
 
+    print(df.sample(20, random_state=1)["article_body"].str[-150:].to_string())
+
+    for p in ["Lire aussi", "Newsletter", "Publicité", "Cookie", "Belga", "abonnez"]:
+        print(p, f"{df['article_body'].str.contains(p, case=False).mean():.1%}")
+
+    df["article_length"] = (
+    df["article_body"]
+    .str.len()
+    )
+
+    print(
+    df["article_body"]
+    .str.contains(
+        r"\\",
+        regex=True
+    )
+    .mean()
+)
 
 if __name__ == "__main__":
     main()

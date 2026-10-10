@@ -3,7 +3,6 @@ Parse all collected article URLs and save them to a CSV file.
 
 Usage (from the project root):
     python src/main.py        # all URLs
-    python src/main.py 10     # test run on the first 10 URLs
 """
 
 import csv
