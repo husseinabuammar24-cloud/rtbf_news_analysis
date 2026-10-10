@@ -22,3 +22,25 @@ bin-release/
 nlp-env/
 __pycache__/
 *.pyc
+
+*.npy
+*.pkl
+*.pickle
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+nlp-*nv/
+
+# ML artifacts
+*.npy
+*.pkl
+*.*ickle
+
+# macOS
+.DS_Store
+
+nlp-env/
+*mbeddings.npy

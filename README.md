@@ -213,3 +213,31 @@ Occurrences were found to be very rare and mostly appeared in legitimate article
 🔄 Clustering in progress
 
 ⏳ Dashboard and deployment pending
+
+
+
+## Topic Modeling Results
+
+BERTopic was applied to 2,123 cleaned RTBF articles using multilingual sentence embeddings.
+
+Results:
+
+- 37 semantic topics identified
+- Articles grouped by meaning rather than website categories
+- Topics discovered automatically from article content
+
+Examples of topics:
+
+- Film & Television
+- Rock & Music
+- Cycling
+- Education
+- Government & Budget
+- Ukraine War
+- Video Games
+- Artificial Intelligence
+- Health & Cancer
+- Formula 1
+- Gaza Conflict
+- Public Transport
+- Weather
