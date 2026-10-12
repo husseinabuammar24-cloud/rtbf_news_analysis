@@ -267,7 +267,9 @@ with st.sidebar.expander("How it works"):
         "The topic names were written by hand after reading the keywords."
     )
 
-st.sidebar.markdown("[Code on GitHub](https://github.com/YOUR_USERNAME/rtbf_news_analysis)")
+st.sidebar.markdown(
+    "[Code on GitHub](https://github.com/husseinabuammar24-cloud/rtbf_news_analysis)"
+)
 
 # ---------------------------------------------------------------- Overview
 if page == "Overview":
