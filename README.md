@@ -8,12 +8,6 @@ An end-to-end NLP project that turns RTBF news articles into an explorable map o
 
 ![RTBF Coverage Intelligence dashboard overview](assets/readme/dashboard_overview.png)
 
-**Topic distribution and semantic map**
-
-![Article counts by topic](assets/readme/topics_barchart.png)
-
-![Semantic map of article topics](assets/readme/topics_map.png)
-
 ## Pipeline
 
 1. Collect article URLs with `src/archive.py`.
