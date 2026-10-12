@@ -46,7 +46,6 @@ Sentence Transformers create multilingual semantic embeddings. BERTopic combines
 
 ```text
 .
-├── .devcontainer/       # Development container settings
 ├── .streamlit/          # Streamlit theme
 ├── assets/              # README screenshots
 ├── dashboard/
@@ -68,7 +67,7 @@ Sentence Transformers create multilingual semantic embeddings. BERTopic combines
 
 Requires Python 3. Create an environment and install dependencies:
 
-The development container uses **Python 3.11**. Use Python 3.11 for a setup that matches the project configuration.
+**Python 3.11** is recommended for a consistent local setup. The optional development-container configuration is not included in this repository.
 
 ```bash
 python3 -m venv nlp-env
