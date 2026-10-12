@@ -42,5 +42,9 @@ nlp-*nv/
 # macOS
 .DS_Store
 
+# Local session / tool artifacts
+.agents/
+dashboard/.streamlit/
+
 nlp-env/
 *mbeddings.npy

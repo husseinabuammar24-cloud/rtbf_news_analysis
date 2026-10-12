@@ -24,7 +24,26 @@ CAT_COL = "category"
 
 MIN_CLUSTER_SIZE = 10        # smaller -> more, finer topics; larger -> fewer, broader topics
 REDUCE_OUTLIERS = False
+RECENT_DAYS = 30             # time chart only uses the last N days (a few old articles stretch the axis)
 SEED = 42
+
+# Readable names {topic_id: "name"}. Ids are only valid for THIS model run:
+# if you change MIN_CLUSTER_SIZE, the data or the embeddings, check them again.
+# Topics not listed here keep their automatic 3-keyword label.
+TOPIC_NAMES: dict[int, str] = {
+    0: "Cinéma & séries",
+    1: "Musique & concerts",
+    2: "Cyclisme",
+    3: "Écoles & jeunesse",
+    4: "Diables Rouges (football)",
+    5: "Procès & justice",
+    6: "Guerre en Ukraine",
+    7: "Jeux vidéo",
+    8: "Budget & gouvernement",
+    9: "Météo",
+    10: "Événements & festivals (Namur)",
+    11: "Football : Ronaldo & Messi",
+}
 
 # Compact French stopword list (no extra download needed) + RTBF-specific words.
 FRENCH_STOPWORDS = """
@@ -58,7 +77,7 @@ def build_topic_model():
                             cluster_selection_method="eom", prediction_data=True)
     vectorizer = CountVectorizer(stop_words=FRENCH_STOPWORDS, ngram_range=(1, 2), min_df=3)
     return BERTopic(
-        language="french",          
+        language="french",
         umap_model=umap_model,
         hdbscan_model=hdbscan_model,
         vectorizer_model=vectorizer,
@@ -66,6 +85,19 @@ def build_topic_model():
         calculate_probabilities=False,
         verbose=True,
     )
+
+
+def apply_topic_names(topic_model):
+    """Automatic 3-keyword labels first, then overwrite with TOPIC_NAMES. Returns {id: label}."""
+    ids = sorted(topic_model.get_topics().keys())            # includes -1
+    auto = topic_model.generate_topic_labels(
+        nr_words=3, topic_prefix=False, word_length=15, separator=" / "
+    )
+    labels = dict(zip(ids, auto))
+    labels.update(TOPIC_NAMES)
+    labels[-1] = "Non classé"
+    topic_model.set_topic_labels(labels)
+    return labels
 
 
 def main():
@@ -84,8 +116,11 @@ def main():
         print(f"Outliers after reduction: {sum(t == -1 for t in topics)}")
 
     df["topic"] = topics
+    labels = apply_topic_names(topic_model)
+
     topic_info = topic_model.get_topic_info()
-    print("\n", topic_info[["Topic", "Count", "Name"]].head(25).to_string(index=False))
+    topic_info["Label"] = topic_info["Topic"].map(labels)
+    print("\n", topic_info[["Topic", "Count", "Label"]].head(25).to_string(index=False))
 
     # Save results
     topic_info.to_csv(OUT_DIR / "topic_info.csv", index=False)
@@ -96,19 +131,34 @@ def main():
     print("\nMain categories per topic (first 15):")
     print(top_cats.head(15).to_string())
 
-    # Visualizations (interactive HTML)
-    topic_model.visualize_barchart(top_n_topics=12).write_html(OUT_DIR / "topics_barchart.html")
-    topic_model.visualize_topics().write_html(OUT_DIR / "topics_map.html")
-    topic_model.visualize_hierarchy().write_html(OUT_DIR / "topics_hierarchy.html")
+    # Visualizations (interactive HTML), all using the readable names
+    topic_model.visualize_barchart(
+        top_n_topics=12, n_words=5, custom_labels=True, width=320, height=320
+    ).write_html(OUT_DIR / "topics_barchart.html")
+
+    topic_model.visualize_topics(custom_labels=True).write_html(OUT_DIR / "topics_map.html")
+    topic_model.visualize_hierarchy(custom_labels=True).write_html(OUT_DIR / "topics_hierarchy.html")
 
     umap_2d = UMAP(n_neighbors=15, n_components=2, min_dist=0.0,
                    metric="cosine", random_state=SEED).fit_transform(embeddings)
-    topic_model.visualize_documents(df[TITLE_COL].tolist(), reduced_embeddings=umap_2d,
-                                    hide_annotations=True).write_html(OUT_DIR / "documents_map.html")
+    topic_model.visualize_documents(
+        df[TITLE_COL].tolist(), reduced_embeddings=umap_2d,
+        hide_annotations=True, custom_labels=True,
+    ).write_html(OUT_DIR / "documents_map.html")
 
-    timestamps = df[DATE_COL].dt.tz_localize(None)   # BERTopic wants naive datetimes
-    tot = topic_model.topics_over_time(docs, timestamps, nr_bins=24)
-    topic_model.visualize_topics_over_time(tot, top_n_topics=8).write_html(OUT_DIR / "topics_over_time.html")
+    # Topics over time: only the last RECENT_DAYS days, one bin per day.
+    # Older articles with wrong/archived dates would otherwise stretch the axis over years.
+    timestamps = df[DATE_COL].dt.tz_localize(None)           # BERTopic wants naive datetimes
+    recent = timestamps >= timestamps.max() - pd.Timedelta(days=RECENT_DAYS)
+    tot = topic_model.topics_over_time(
+        [d for d, keep in zip(docs, recent) if keep],
+        timestamps[recent].tolist(),
+        topics=df.loc[recent, "topic"].tolist(),
+        nr_bins=RECENT_DAYS,
+    )
+    topic_model.visualize_topics_over_time(
+        tot, top_n_topics=8, custom_labels=True
+    ).write_html(OUT_DIR / "topics_over_time.html")
 
     print(f"\nSaved results and HTML visualizations in {OUT_DIR}/")
 

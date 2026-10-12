@@ -1,23 +1,18 @@
-"""
-Clean the raw RTBF articles.
+"""Clean the raw RTBF article dataset before embedding and clustering.
 
-Usage (from the project root, after the scraper has finished):
+Usage (from the project root):
     python src/preprocessing.py
 """
 
+import re
 from pathlib import Path
 
 import pandas as pd
 
-import re
+RAW_PATH = Path("data/raw/articles.csv")
+OUT_PATH = Path("data/processed/articles_clean.csv")
+MIN_LENGTH = 500
 
-RAW = Path("data/raw/articles.csv")
-OUT = Path("data/processed/articles_clean.csv")
-
-MIN_LENGTH = 500  # shorter pages are usually videos, briefs or promos
-
-# Titles that are service/promo pages, not news (case-insensitive regex).
-# Extend this list as you spot more in the data.
 NON_NEWS_TITLES = [
     r"^RTBF ACTUS\s*:",
     r"abonnez-vous",
@@ -25,83 +20,77 @@ NON_NEWS_TITLES = [
     r"^Gagnez ",
 ]
 
-def clean_for_embeddings(text):
-    text = text.strip()
-    text = re.sub(r"\s+", " ", text)
-    return text
 
-def step(df: pd.DataFrame, label: str, before: int) -> int:
-    print(f"{label:<35} {before - len(df):>5} removed -> {len(df)} rows")
-    return len(df)
+def clean_for_embeddings(text: str) -> str:
+    """Normalize whitespace for embedding input."""
+    return re.sub(r"\s+", " ", text.strip())
+
+
+def step(frame: pd.DataFrame, label: str, before: int) -> int:
+    """Print how many rows were removed and return the new row count."""
+    removed = before - len(frame)
+    print(f"{label:<35} {removed:>5} removed -> {len(frame)} rows")
+    return len(frame)
 
 
 def main() -> None:
-    df = pd.read_csv(RAW)
-    n = len(df)
-    print(f"Raw: {n} rows, {df.shape[1]} columns\n")
+    """Apply a series of cleanup rules to the raw RTBF dataset."""
+    dataframe = pd.read_csv(RAW_PATH)
+    before = len(dataframe)
+    print(f"Raw: {before} rows, {dataframe.shape[1]} columns\n")
 
-    # 1. Missing essentials
-    df = df.dropna(subset=["title", "article_body"])
-    n = step(df, "Missing title/body", n)
+    dataframe = dataframe.dropna(subset=["title", "article_body"])
+    before = step(dataframe, "Missing title/body", before)
 
-    # 2. Duplicates
-    df = df.drop_duplicates(subset="url")
-    n = step(df, "Duplicate url", n)
-    df = df.drop_duplicates(subset="title")
-    n = step(df, "Duplicate title", n)
+    dataframe = dataframe.drop_duplicates(subset="url")
+    before = step(dataframe, "Duplicate url", before)
+    dataframe = dataframe.drop_duplicates(subset="title")
+    before = step(dataframe, "Duplicate title", before)
 
-    # 3. Service / promo pages
     pattern = "|".join(NON_NEWS_TITLES)
-    df = df[~df["title"].str.contains(pattern, case=False, regex=True)]
-    n = step(df, "Non-news titles", n)
+    dataframe = dataframe[~dataframe["title"].str.contains(pattern, case=False, regex=True)]
+    before = step(dataframe, "Non-news titles", before)
 
-    # 4. Too-short articles
-    df = df[df["article_length"] >= MIN_LENGTH]
-    n = step(df, f"Shorter than {MIN_LENGTH} chars", n)
+    dataframe = dataframe[dataframe["article_length"] >= MIN_LENGTH]
+    before = step(dataframe, f"Shorter than {MIN_LENGTH} chars", before)
 
-    # 5. Dates: parse with timezone, convert to Brussels time
-    df = df.copy()
-    df["published_date"] = pd.to_datetime(
-        df["published_date"], utc=True, errors="coerce"
+    dataframe = dataframe.copy()
+    dataframe["published_date"] = pd.to_datetime(
+        dataframe["published_date"], utc=True, errors="coerce"
     ).dt.tz_convert("Europe/Brussels")
-    df = df.dropna(subset=["published_date"])
-    n = step(df, "Unparseable dates", n)
-    df["date"] = df["published_date"].dt.date
+    dataframe = dataframe.dropna(subset=["published_date"])
+    before = step(dataframe, "Unparseable dates", before)
+    dataframe["date"] = dataframe["published_date"].dt.date
 
-    # 6. Text used later for embeddings.
-    # article_body already starts with the lead, so don't add 'lead' again.
-    df["text"] = df["title"] + ". " + df["article_body"].str.replace("\n", " ")
-
-    df = df.sort_values("published_date").reset_index(drop=True)
-
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(OUT, index=False)
-
-    print(f"\nClean dataset: {df.shape[0]} articles -> {OUT}")
-    print(f"Period: {df['published_date'].min()}  ->  {df['published_date'].max()}")
-    print("\nArticles per category:")
-    print(df["category"].fillna("(none)").replace("", "(none)").value_counts().head(10))
-    print("\nArticle length:")
-    print(df["article_length"].describe())
-
-    print(df.sample(20, random_state=1)["article_body"].str[-150:].to_string())
-
-    for p in ["Lire aussi", "Newsletter", "Publicité", "Cookie", "Belga", "abonnez"]:
-        print(p, f"{df['article_body'].str.contains(p, case=False).mean():.1%}")
-
-    df["article_length"] = (
-    df["article_body"]
-    .str.len()
+    dataframe["text"] = (
+        dataframe["title"] + ". " + dataframe["article_body"].str.replace("\n", " ")
     )
+    dataframe["text"] = dataframe["text"].map(clean_for_embeddings)
+
+    dataframe = dataframe.sort_values("published_date").reset_index(drop=True)
+
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    dataframe.to_csv(OUT_PATH, index=False)
+
+    print(f"\nClean dataset: {dataframe.shape[0]} articles -> {OUT_PATH}")
+    print(f"Period: {dataframe['published_date'].min()}  ->  {dataframe['published_date'].max()}")
+    print("\nArticles per category:")
+    print(
+        dataframe["category"].fillna("(none)").replace("", "(none)").value_counts().head(10)
+    )
+    print("\nArticle length:")
+    print(dataframe["article_length"].describe())
+
+    print(dataframe.sample(20, random_state=1)["article_body"].str[-150:].to_string())
+
+    for phrase in ["Lire aussi", "Newsletter", "Publicité", "Cookie", "Belga", "abonnez"]:
+        print(f"{phrase}: {dataframe['article_body'].str.contains(phrase, case=False).mean():.1%}")
 
     print(
-    df["article_body"]
-    .str.contains(
-        r"\\",
-        regex=True
+        "Backslashes in body:",
+        dataframe["article_body"].str.contains(r"\\", regex=True).mean(),
     )
-    .mean()
-)
+
 
 if __name__ == "__main__":
     main()
