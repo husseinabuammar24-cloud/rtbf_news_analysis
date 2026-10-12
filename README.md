@@ -6,6 +6,8 @@ An end-to-end NLP project that turns RTBF news articles into an explorable map o
 
 [Open RTBF News Analysis](https://rtbf-news-analysis.streamlit.app/)
 
+![Document map showing how RTBF articles group into topics](outputs/documents_map.png)
+
 ## Pipeline
 
 1. Collect article URLs with `src/archive.py`.
