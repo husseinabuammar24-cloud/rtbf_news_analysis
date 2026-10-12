@@ -51,18 +51,9 @@ streamlit run dashboard/app.py
 
 The scraping step requires browser support from Playwright. Install its browser once with `playwright install chromium` if needed.
 
-## Deploy the dashboard
+## Live dashboard
 
-The dashboard can be hosted on [Streamlit Community Cloud](https://share.streamlit.io/):
-
-**Live dashboard:** [Open RTBF News Analysis](https://rtbf-news-analysis.streamlit.app/)
-
-1. Push the repository to GitHub, including the `data/` and `outputs/` files used by the dashboard.
-2. Sign in to Streamlit Community Cloud with GitHub and select **Create app**.
-3. Choose this repository, the `main` branch, and `dashboard/app.py` as the app file.
-4. Deploy the app. To let anyone open it, set its visibility to public in the app's sharing settings.
-
-Community Cloud installs the dashboard dependencies from `dashboard/requirements.txt` and uses the root `.streamlit/config.toml` for the theme. After deployment, copy the app's URL from Streamlit Community Cloud and share it. Commits pushed to the selected branch trigger updates to the deployed app.
+[Open RTBF News Analysis](https://rtbf-news-analysis.streamlit.app/)
 
 ## Main files
 
