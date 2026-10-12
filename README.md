@@ -2,6 +2,18 @@
 
 An end-to-end NLP project that turns RTBF news articles into an explorable map of recurring topics. The workflow collects and parses articles, cleans the corpus, creates multilingual embeddings, clusters similar stories, and models topics with BERTopic.
 
+## Dashboard preview
+
+**Coverage overview**
+
+![RTBF Coverage Intelligence dashboard overview](assets/readme/dashboard_overview.png)
+
+**Topic distribution and semantic map**
+
+![Article counts by topic](assets/readme/topics_barchart.png)
+
+![Semantic map of article topics](assets/readme/topics_map.png)
+
 ## Pipeline
 
 1. Collect article URLs with `src/archive.py`.
