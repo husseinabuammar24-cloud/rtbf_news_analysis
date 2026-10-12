@@ -43,6 +43,8 @@ The scraping step requires browser support from Playwright. Install its browser 
 
 The dashboard can be hosted on [Streamlit Community Cloud](https://share.streamlit.io/):
 
+**Live dashboard:** [Open RTBF News Analysis](https://rtbf-news-analysis.streamlit.app/)
+
 1. Push the repository to GitHub, including the `data/` and `outputs/` files used by the dashboard.
 2. Sign in to Streamlit Community Cloud with GitHub and select **Create app**.
 3. Choose this repository, the `main` branch, and `dashboard/app.py` as the app file.
