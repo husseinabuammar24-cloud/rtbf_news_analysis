@@ -20,6 +20,24 @@ An end-to-end NLP project that turns RTBF news articles into an explorable map o
 
 The analysis uses Sentence Transformers, UMAP, HDBSCAN, and BERTopic. Data collection and processing use Python, Playwright, Requests, BeautifulSoup, pandas, and NumPy; visualizations use Plotly and Streamlit.
 
+## Repository structure
+
+```text
+.
+├── .devcontainer/       # Development container settings
+├── .streamlit/          # Streamlit theme
+├── assets/readme/       # Dashboard screenshots
+├── dashboard/           # Streamlit app and app dependencies
+├── data/
+│   ├── raw/             # Collected URLs and scraped articles
+│   └── processed/       # Cleaned article corpus
+├── outputs/             # Topic, cluster, map, and visualization results
+├── src/                 # Collection, processing, and modeling scripts
+├── tests/               # Scraper check
+├── README.md
+└── requirements.txt     # Full pipeline dependencies
+```
+
 ## Setup and run
 
 Requires Python 3. Create an environment and install dependencies:
