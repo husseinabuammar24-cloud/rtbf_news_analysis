@@ -2,6 +2,10 @@
 
 An end-to-end NLP project that turns RTBF news articles into an explorable map of recurring topics. The workflow collects and parses articles, cleans the corpus, creates multilingual embeddings, clusters similar stories, and models topics with BERTopic.
 
+## Live dashboard
+
+[Open RTBF News Analysis](https://rtbf-news-analysis.streamlit.app/)
+
 ## Dashboard preview
 
 **Coverage overview**
@@ -26,14 +30,18 @@ The analysis uses Sentence Transformers, UMAP, HDBSCAN, and BERTopic. Data colle
 .
 ├── .devcontainer/       # Development container settings
 ├── .streamlit/          # Streamlit theme
-├── assets/readme/       # Dashboard screenshots
-├── dashboard/           # Streamlit app and app dependencies
+├── assets/
+│   └── readme/           # Dashboard screenshots
+├── dashboard/
+│   ├── app.py            # Streamlit dashboard
+│   └── requirements.txt  # Dashboard dependencies
 ├── data/
 │   ├── raw/             # Collected URLs and scraped articles
 │   └── processed/       # Cleaned article corpus
 ├── outputs/             # Topic, cluster, map, and visualization results
 ├── src/                 # Collection, processing, and modeling scripts
 ├── tests/               # Scraper check
+├── .gitignore
 ├── README.md
 └── requirements.txt     # Full pipeline dependencies
 ```
@@ -63,19 +71,14 @@ streamlit run dashboard/app.py
 
 The scraping step requires browser support from Playwright. Install its browser once with `playwright install chromium` if needed.
 
-## Live dashboard
-
-[Open RTBF News Analysis](https://rtbf-news-analysis.streamlit.app/)
-
 ## Main files
 
 - `data/raw/articles.csv` — scraped article records
 - `data/processed/articles_clean.csv` — cleaned article corpus
-- `data/processed/embeddings.npy` — semantic vectors
+- `data/processed/embeddings.npy` — generated semantic vectors (not committed)
 - `outputs/articles_with_clusters.csv`, `outputs/cluster_summary.csv` — cluster assignments and summaries
 - `outputs/articles_with_topics.csv`, `outputs/topic_info.csv` — topic assignments and topic summaries
 - `outputs/*.html` — interactive topic and document visualizations
-- `dashboard/app.py` — Streamlit exploration dashboard
 
 Topic labels are automated summaries of semantic groups, not a definitive news taxonomy. Review representative articles and validate labels before drawing editorial conclusions.
 
