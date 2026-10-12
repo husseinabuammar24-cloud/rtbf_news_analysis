@@ -496,19 +496,34 @@ elif page == "Article Map":
 
 # ---------------------------------------------------------------- Visualizations
 else:
-    page_header("Visualizations", "Interactive charts exported from the topic model.")
+    page_header("Visualizations", "Static images exported from the topic model.")
     files = {
-        "Topic bar chart": ("topics_barchart.html", 1100),
-        "Topic map": ("topics_map.html", 750),
-        "Document map": ("documents_map.html", 750),
-        "Topics over time": ("topics_over_time.html", 650),
+        "Topic bar chart": (
+            "topics_barchart.png",
+            "Top words and scores for the largest article topics.",
+        ),
+        "Topic map": (
+            "topics_map.png",
+            "Map showing relationships between the modeled topics.",
+        ),
+        "Topic hierarchy": (
+            "topics_hierarchy.png",
+            "Hierarchical clustering of the modeled topics.",
+        ),
+        "Document map": (
+            "documents_map.png",
+            "Map of articles positioned by semantic similarity and colored by topic.",
+        ),
+        "Topics over time": (
+            "topics_over_time.png",
+            "Counts of selected topics over the recent publication period.",
+        ),
     }
     tabs = st.tabs(list(files))
-    for tab, (fname, height) in zip(tabs, files.values()):
+    for tab, (fname, alt) in zip(tabs, files.values()):
         with tab:
             path = OUT / fname
             if path.exists():
-                html_string = path.read_text(encoding="utf-8")
-                st.iframe(html_string, height=height)
+                st.image(path, width="stretch", alt=alt)
             else:
-                st.warning(f"{fname} not found in outputs/")
+                st.warning(f"{fname} not found in outputs/. Rerun src/topic_modeling.py to create it.")

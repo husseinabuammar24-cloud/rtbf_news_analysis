@@ -6,12 +6,6 @@ An end-to-end NLP project that turns RTBF news articles into an explorable map o
 
 [Open RTBF News Analysis](https://rtbf-news-analysis.streamlit.app/)
 
-## Dashboard preview
-
-**Coverage overview**
-
-![RTBF Coverage Intelligence dashboard overview](assets/readme/dashboard_overview.png)
-
 ## Pipeline
 
 1. Collect article URLs with `src/archive.py`.
@@ -30,8 +24,6 @@ The analysis uses Sentence Transformers, UMAP, HDBSCAN, and BERTopic. Data colle
 .
 ├── .devcontainer/       # Development container settings
 ├── .streamlit/          # Streamlit theme
-├── assets/
-│   └── readme/           # Dashboard screenshots
 ├── dashboard/
 │   ├── app.py            # Streamlit dashboard
 │   └── requirements.txt  # Dashboard dependencies
@@ -69,7 +61,7 @@ python src/make_doc_map.py
 streamlit run dashboard/app.py
 ```
 
-The scraping step requires browser support from Playwright. Install its browser once with `playwright install chromium` if needed.
+Scraping and PNG chart export require Playwright's Chromium browser. Install it once with `playwright install chromium` if needed.
 
 ## Main files
 
@@ -78,7 +70,7 @@ The scraping step requires browser support from Playwright. Install its browser 
 - `data/processed/embeddings.npy` — generated semantic vectors (not committed)
 - `outputs/articles_with_clusters.csv`, `outputs/cluster_summary.csv` — cluster assignments and summaries
 - `outputs/articles_with_topics.csv`, `outputs/topic_info.csv` — topic assignments and topic summaries
-- `outputs/*.html` — interactive topic and document visualizations
+- `outputs/*.png` — static topic and document visualizations
 
 Topic labels are automated summaries of semantic groups, not a definitive news taxonomy. Review representative articles and validate labels before drawing editorial conclusions.
 
