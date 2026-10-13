@@ -38,8 +38,6 @@ Results are based on the files currently committed under `outputs/` and will cha
 6. Discover and summarize topics with `src/topic_modeling.py`, which exports interactive HTML visualizations, and build the document map with `src/make_doc_map.py`.
 7. Explore results in the Streamlit dashboard.
 
-![RTBF pipeline overview](assets/readme/rtbf_pipeline.png)
-
 The analysis uses Sentence Transformers, UMAP, HDBSCAN, and BERTopic. Data collection and processing use Python, Playwright, Requests, BeautifulSoup, pandas, and NumPy; visualizations use Plotly and Streamlit.
 
 Sentence Transformers create multilingual semantic embeddings. BERTopic combines embeddings with dimensionality reduction and density-based clustering, which helps group articles by meaning rather than relying only on word counts as standard LDA does. K-Means is also run separately to provide a fixed-count cluster view. Topic labels combine keywords with manual names and should be reviewed.
