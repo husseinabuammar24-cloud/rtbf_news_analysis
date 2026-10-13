@@ -6,7 +6,7 @@ An end-to-end NLP project that turns RTBF news articles into an explorable map o
 
 [Open RTBF News Analysis](https://rtbf-news-analysis.streamlit.app/)
 
-![Document map showing how RTBF articles group into topics](outputs/documents_map.png)
+[Explore the interactive document map](outputs/documents_map.html)
 
 ## Project overview
 
@@ -26,7 +26,7 @@ Results are based on the files currently committed under `outputs/` and will cha
 - Search topic names and keywords in the Topic Explorer.
 - Filter and search articles by RTBF category, topic, date, and title; open the source article from its link.
 - Explore a semantic article map, highlight topics, and color points by topic, RTBF category, or K-Means cluster.
-- View exported topic visualizations and download the article table as CSV.
+- Explore interactive topic visualizations and download the article table as CSV.
 
 ## Pipeline
 
@@ -35,7 +35,7 @@ Results are based on the files currently committed under `outputs/` and will cha
 3. Clean and validate the corpus with `src/preprocessing.py`.
 4. Generate multilingual sentence embeddings with `src/embeddings.py`.
 5. Cluster articles with `src/clustering.py`.
-6. Discover and summarize topics with `src/topic_modeling.py` and build the document map with `src/make_doc_map.py`.
+6. Discover and summarize topics with `src/topic_modeling.py`, which exports interactive HTML visualizations, and build the document map with `src/make_doc_map.py`.
 7. Explore results in the Streamlit dashboard.
 
 ![RTBF pipeline overview](assets/readme/rtbf_pipeline.png)
@@ -90,7 +90,7 @@ python src/make_doc_map.py
 streamlit run dashboard/app.py
 ```
 
-Scraping and PNG chart export require Playwright's Chromium browser. Install it once with `playwright install chromium` if needed.
+Scraping requires Playwright's Chromium browser. Install it once with `playwright install chromium` if needed. Topic visualizations are exported as interactive HTML charts.
 
 ## Screenshots
 
@@ -98,7 +98,7 @@ The article map appears near the top of this README. The dashboard overview and 
 
 ![RTBF Coverage Intelligence dashboard overview](assets/readme/dashboard.png)
 
-![Topic word-score chart for the largest modeled topics](outputs/topics_barchart.png)
+[Open the interactive topic word-score chart](outputs/topics_barchart.html)
 
 ## Main files
 
@@ -107,7 +107,7 @@ The article map appears near the top of this README. The dashboard overview and 
 - `data/processed/embeddings.npy` — generated semantic vectors (not committed)
 - `outputs/articles_with_clusters.csv`, `outputs/cluster_summary.csv` — cluster assignments and summaries
 - `outputs/articles_with_topics.csv`, `outputs/topic_info.csv` — topic assignments and topic summaries
-- `outputs/*.png` — static topic and document visualizations
+- `outputs/*.html` — interactive topic and document visualizations
 
 Topic labels are automated summaries of semantic groups, not a definitive news taxonomy. Review representative articles and validate labels before drawing editorial conclusions.
 
@@ -129,7 +129,7 @@ High-level breakdown of the four-day project:
 
 ## Deployment and scaling
 
-The dashboard is deployed on Streamlit Community Cloud and reads the prepared CSV and PNG files in this repository. The current project runs collection and model generation as manual pipeline steps. For a production workflow, schedule scraping and model updates on a worker, store raw and processed data plus model artifacts in cloud object storage, and let the hosted dashboard read the latest prepared outputs. This scheduled and storage-backed setup is a proposed next step; it is not currently automated.
+The dashboard is deployed on Streamlit Community Cloud and reads the prepared CSV and interactive HTML visualization files in this repository. The current project runs collection and model generation as manual pipeline steps. For a production workflow, schedule scraping and model updates on a worker, store raw and processed data plus model artifacts in cloud object storage, and let the hosted dashboard read the latest prepared outputs. This scheduled and storage-backed setup is a proposed next step; it is not currently automated.
 
 ## Limitations and next steps
 

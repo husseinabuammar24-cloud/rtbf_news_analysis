@@ -496,34 +496,35 @@ elif page == "Article Map":
 
 # ---------------------------------------------------------------- Visualizations
 else:
-    page_header("Visualizations", "Static images exported from the topic model.")
+    page_header("Visualizations", "Interactive charts exported from the topic model.")
     files = {
         "Topic bar chart": (
-            "topics_barchart.png",
+            "topics_barchart.html",
             "Top words and scores for the largest article topics.",
         ),
         "Topic map": (
-            "topics_map.png",
+            "topics_map.html",
             "Map showing relationships between the modeled topics.",
         ),
         "Topic hierarchy": (
-            "topics_hierarchy.png",
+            "topics_hierarchy.html",
             "Hierarchical clustering of the modeled topics.",
         ),
         "Document map": (
-            "documents_map.png",
+            "documents_map.html",
             "Map of articles positioned by semantic similarity and colored by topic.",
         ),
         "Topics over time": (
-            "topics_over_time.png",
+            "topics_over_time.html",
             "Counts of selected topics over the recent publication period.",
         ),
     }
     tabs = st.tabs(list(files))
-    for tab, (fname, alt) in zip(tabs, files.values()):
+    for tab, (fname, description) in zip(tabs, files.values()):
         with tab:
             path = OUT / fname
             if path.exists():
-                st.image(path, width="stretch", alt=alt)
+                st.html(path, unsafe_allow_javascript=True)
+                st.caption(description)
             else:
                 st.warning(f"{fname} not found in outputs/. Rerun src/topic_modeling.py to create it.")

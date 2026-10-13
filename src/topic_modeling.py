@@ -6,13 +6,11 @@ Needs: data/processed/articles_clean.csv and data/processed/embeddings.npy
 (embeddings.npy must come from the SAME csv - re-run embeddings.py if you re-run preprocessing).
 """
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 import numpy as np
 import pandas as pd
 from bertopic import BERTopic
 from hdbscan import HDBSCAN
-from playwright.sync_api import sync_playwright
 from sklearn.feature_extraction.text import CountVectorizer
 from umap import UMAP
 
@@ -103,31 +101,16 @@ def apply_topic_names(topic_model):
 
 
 def save_visualizations(figures) -> None:
-    """Render Plotly figures to PNG without keeping HTML files in outputs/."""
-    with TemporaryDirectory(prefix="rtbf_visualizations_") as temp_dir:
-        temp_path = Path(temp_dir)
-        with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=True)
-            page = browser.new_page(
-                viewport={"width": 1700, "height": 1200},
-                device_scale_factor=2,
-            )
-            for png_name, figure in figures.items():
-                html_path = temp_path / f"{Path(png_name).stem}.html"
-                figure.write_html(html_path)
-                page.goto(html_path.resolve().as_uri(), wait_until="load")
-                chart = page.locator(".plotly-graph-div").first
-                chart.wait_for(state="visible", timeout=30000)
-                page.wait_for_timeout(400)
-                chart.screenshot(path=str(OUT_DIR / png_name))
-                print(f"Saved {OUT_DIR / png_name}")
-            browser.close()
+    """Save interactive Plotly figures and remove their legacy PNG exports."""
+    for html_name, figure in figures.items():
+        html_path = OUT_DIR / html_name
+        figure.write_html(html_path, include_plotlyjs="cdn")
+        print(f"Saved {html_path}")
 
-    # Remove HTML files created by previous versions after all PNGs are saved.
-    for png_name in figures:
-        old_html = OUT_DIR / f"{Path(png_name).stem}.html"
-        if old_html.exists():
-            old_html.unlink()
+    for html_name in figures:
+        legacy_png = OUT_DIR / f"{Path(html_name).stem}.png"
+        if legacy_png.exists():
+            legacy_png.unlink()
 
 
 def main():
@@ -161,18 +144,18 @@ def main():
     print("\nMain categories per topic (first 15):")
     print(top_cats.head(15).to_string())
 
-    # Static PNG visualizations, all using the readable names.
+    # Interactive HTML visualizations, all using the readable names.
     figures = {
-        "topics_barchart.png": topic_model.visualize_barchart(
+        "topics_barchart.html": topic_model.visualize_barchart(
             top_n_topics=12, n_words=5, custom_labels=True, width=320, height=320
         ),
-        "topics_map.png": topic_model.visualize_topics(custom_labels=True),
-        "topics_hierarchy.png": topic_model.visualize_hierarchy(custom_labels=True),
+        "topics_map.html": topic_model.visualize_topics(custom_labels=True),
+        "topics_hierarchy.html": topic_model.visualize_hierarchy(custom_labels=True),
     }
 
     umap_2d = UMAP(n_neighbors=15, n_components=2, min_dist=0.0,
                    metric="cosine", random_state=SEED).fit_transform(embeddings)
-    figures["documents_map.png"] = topic_model.visualize_documents(
+    figures["documents_map.html"] = topic_model.visualize_documents(
         df[TITLE_COL].tolist(), reduced_embeddings=umap_2d,
         hide_annotations=True, custom_labels=True,
     )
@@ -187,13 +170,13 @@ def main():
         topics=df.loc[recent, "topic"].tolist(),
         nr_bins=RECENT_DAYS,
     )
-    figures["topics_over_time.png"] = topic_model.visualize_topics_over_time(
+    figures["topics_over_time.html"] = topic_model.visualize_topics_over_time(
         tot, top_n_topics=8, custom_labels=True
     )
 
     save_visualizations(figures)
 
-    print(f"\nSaved results and PNG visualizations in {OUT_DIR}/")
+    print(f"\nSaved results and interactive HTML visualizations in {OUT_DIR}/")
 
 
 if __name__ == "__main__":
