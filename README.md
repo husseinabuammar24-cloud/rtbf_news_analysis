@@ -1,22 +1,21 @@
 # RTBF News Analysis
 
-An end-to-end NLP project that turns RTBF news articles into an explorable map of recurring topics. The workflow collects and parses articles, cleans the corpus, creates multilingual embeddings, clusters similar stories, and models topics with BERTopic.
+An end-to-end NLP project that turns RTBF news articles into an explorable map of recurring topics. The pipeline collects and validates articles, creates multilingual embeddings, discovers topics with BERTopic, and independently groups articles with K-Means.
 
-## Live dashboard
+## Project status
 
-[Open RTBF News Analysis](https://rtbf-news-analysis.streamlit.app/)
-
-[Explore the interactive document map](outputs/documents_map.html)
+The core data collection and analysis pipeline is complete. The Streamlit dashboard is under development, with deployment and presentation work still to come.
 
 ## Project overview
 
-RTBF publishes articles across many subjects, making it difficult to scan recurring coverage themes across a large corpus. This project collects public RTBF articles, cleans them, represents their meaning with multilingual sentence embeddings, groups them with clustering and topic modeling, and presents the results in an interactive dashboard. It is intended for readers and analysts who want to explore what RTBF covers and how themes change over time.
+RTBF publishes articles across many subjects, making it difficult to scan recurring coverage themes across a large corpus. This project collects public RTBF articles, cleans them, represents their meaning with multilingual sentence embeddings, and analyzes them with topic modeling and clustering. The results are prepared for exploration in a Streamlit dashboard.
 
 ## Key results
 
 - **2,123 cleaned articles** are included in the current results snapshot.
-- **37 topics** were assigned by BERTopic; **623 articles (29.3%)** were left as outliers because they did not fit a topic.
-- A separate K-Means analysis produced **10 article clusters**.
+- **37 topics** were discovered by BERTopic; **623 articles (29.3%)** were initially labeled as outliers.
+- An independent K-Means analysis produced **10 semantic article clusters**, selected from candidate values between 10 and 50 using silhouette scores.
+- The multilingual embedding model produced a **384-dimensional vector** for each article.
 
 Results are based on the files currently committed under `outputs/` and will change when the pipeline is rerun on a new corpus.
 
@@ -30,17 +29,21 @@ Results are based on the files currently committed under `outputs/` and will cha
 
 ## Pipeline
 
-1. Collect article URLs with `src/archive.py`.
-2. Scrape article metadata and text with `src/scrape_articles.py` and `src/article_parser.py`.
-3. Clean and validate the corpus with `src/preprocessing.py`.
-4. Generate multilingual sentence embeddings with `src/embeddings.py`.
-5. Cluster articles with `src/clustering.py`.
-6. Discover and summarize topics with `src/topic_modeling.py`, which exports interactive HTML visualizations, and build the document map with `src/make_doc_map.py`.
-7. Explore results in the Streamlit dashboard.
+1. Collect article URLs and parse article metadata and text from RTBF pages.
+2. Clean and validate the corpus, removing duplicate titles, non-news pages, and articles shorter than 500 characters.
+3. Generate multilingual sentence embeddings with `src/embeddings.py` using `paraphrase-multilingual-MiniLM-L12-v2`.
+4. Fit BERTopic with UMAP and HDBSCAN to discover article topics and create topic visualizations.
+5. Independently run K-Means on the same article embeddings. Select the cluster count by comparing silhouette scores over candidate values from 10 to 50.
+6. Compare topic assignments with RTBF categories as a qualitative validation check.
+7. Explore the generated results in the Streamlit dashboard.
+
+During quality checks, the article text was reviewed for common page boilerplate such as “Lire aussi,” newsletter prompts, advertising, cookie notices, and subscription prompts. These appeared infrequently, so the corpus was not aggressively stripped of text. The final cleaned corpus contains 2,123 of the 2,161 collected records; average article length is about 2,900 characters.
+
+Example discovered themes include film and television, music, cycling, education, football, justice, the war in Ukraine, video games, government, weather, artificial intelligence, health, Formula 1, museums, gardening, public transport, the Middle East conflict, and tennis. Topic/category matches (for example, artificial intelligence with RTBF’s High Tech category) provide a useful sanity check, while mixed or broad categories still require human review.
 
 The analysis uses Sentence Transformers, UMAP, HDBSCAN, and BERTopic. Data collection and processing use Python, Playwright, Requests, BeautifulSoup, pandas, and NumPy; visualizations use Plotly and Streamlit.
 
-Sentence Transformers create multilingual semantic embeddings. BERTopic combines embeddings with dimensionality reduction and density-based clustering, which helps group articles by meaning rather than relying only on word counts as standard LDA does. K-Means is also run separately to provide a fixed-count cluster view. Topic labels combine keywords with manual names and should be reviewed.
+Sentence Transformers create multilingual semantic embeddings. BERTopic uses UMAP and HDBSCAN to form topic groups and can leave outliers unassigned. K-Means runs separately over the same embeddings and assigns every article to one of a fixed number of clusters. These are complementary views of the corpus, not a sequential step in which K-Means clusters the BERTopic topics. Topic assignments were compared with RTBF categories, but category agreement is only a sanity check; it does not by itself establish topic quality. Topic labels combine keywords with manual names and should be reviewed against representative articles.
 
 ## Repository structure
 
@@ -75,15 +78,15 @@ source nlp-env/bin/activate
 pip install -r requirements.txt
 ```
 
-Run the pipeline from the project root, in order:
+Run the pipeline from the project root. The repository scripts currently split scraping and parsing across their own steps; use the collection scripts present under `src/`:
 
 ```bash
 python src/archive.py
 python src/scrape_articles.py
 python src/preprocessing.py
 python src/embeddings.py
-python src/clustering.py
 python src/topic_modeling.py
+python src/clustering.py
 python src/make_doc_map.py
 streamlit run dashboard/app.py
 ```
@@ -125,9 +128,13 @@ High-level breakdown of the four-day project:
 | 3 | Fit BERTopic, review topic labels, and create visualizations. |
 | 4 | Build the dashboard, deploy it, and document the project. |
 
-## Deployment and scaling
+## Current status and next steps
 
-The dashboard is deployed on Streamlit Community Cloud and reads the prepared CSV and interactive HTML visualization files in this repository. The current project runs collection and model generation as manual pipeline steps. For a production workflow, schedule scraping and model updates on a worker, store raw and processed data plus model artifacts in cloud object storage, and let the hosted dashboard read the latest prepared outputs. This scheduled and storage-backed setup is a proposed next step; it is not currently automated.
+- **Dashboard:** under development. Planned areas include key insights, coverage gaps, topic trends, and business recommendations, alongside article, topic, cluster, and visualization views.
+- **Deployment:** not yet complete; Streamlit Community Cloud is the planned hosting option.
+- **Presentation:** prepare a concise project presentation covering the problem, data collection, topic modeling, clustering and insights, and business value.
+
+Collection and model generation are manual pipeline steps. Scheduling refreshes and storing current data and model artifacts are possible future improvements.
 
 ## Limitations and next steps
 
