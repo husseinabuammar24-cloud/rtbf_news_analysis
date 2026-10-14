@@ -2,9 +2,11 @@
 
 An end-to-end NLP project that turns RTBF news articles into an explorable map of recurring topics. The pipeline collects and validates articles, creates multilingual embeddings, discovers topics with BERTopic, and independently groups articles with K-Means.
 
+[Open the RTBF News Analysis dashboard](https://rtbf-news-analysis.streamlit.app/)
+
 ## Project status
 
-The core data collection and analysis pipeline is complete. The Streamlit dashboard is under development, with deployment and presentation work still to come.
+The core data collection and analysis pipeline is complete. The Streamlit dashboard is live, with further dashboard improvements and the project presentation still in progress.
 
 ## Project overview
 
@@ -130,8 +132,8 @@ High-level breakdown of the four-day project:
 
 ## Current status and next steps
 
-- **Dashboard:** under development. Planned areas include key insights, coverage gaps, topic trends, and business recommendations, alongside article, topic, cluster, and visualization views.
-- **Deployment:** not yet complete; Streamlit Community Cloud is the planned hosting option.
+- **Dashboard:** live on [Streamlit Community Cloud](https://rtbf-news-analysis.streamlit.app/). Planned improvements include key insights, coverage gaps, topic trends, and business recommendations, alongside article, topic, cluster, and visualization views.
+- **Deployment:** hosted on Streamlit Community Cloud.
 - **Presentation:** prepare a concise project presentation covering the problem, data collection, topic modeling, clustering and insights, and business value.
 
 Collection and model generation are manual pipeline steps. Scheduling refreshes and storing current data and model artifacts are possible future improvements.
